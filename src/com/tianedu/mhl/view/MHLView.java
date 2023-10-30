@@ -1,13 +1,18 @@
 package com.tianedu.mhl.view;
 
+import com.tianedu.mhl.domain.Bill;
 import com.tianedu.mhl.domain.DiningTable;
 import com.tianedu.mhl.domain.Employee;
+import com.tianedu.mhl.domain.Menu;
+import com.tianedu.mhl.service.BillService;
 import com.tianedu.mhl.service.DiningTableService;
 import com.tianedu.mhl.service.EmployeeService;
+import com.tianedu.mhl.service.MenuService;
 import com.tianedu.mhl.utils.Utility;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.UUID;
 
 /**
  * @author tian
@@ -21,9 +26,74 @@ public class MHLView {
     private EmployeeService employeeService = new EmployeeService();
     //调用 DiningTable 的属性
     private DiningTableService diningTableService = new DiningTableService();
+    // 定义menuServers 属性
+    private MenuService menuService = new MenuService();
+    //定义BillService属性
+    private BillService billService = new BillService();
 
     public static void main(String[] args) {
         new MHLView().mainMenu();
+    }
+    //显示账单信息
+    public void listBill(){
+        List<Bill> Bills = billService.list();
+        System.out.println("\n编号\t\t菜品号\t\t菜品量\t\t金额\t\t桌号\t\t日期\t\t\t\t\t\t\t状态");
+        for (Bill bill : Bills){
+            System.out.println(bill);
+        }
+        System.out.println("=================显示完毕===================");
+    }
+
+    //完成点餐
+    public void orderMenu(){
+        System.out.println("===============点餐服务==================");
+        System.out.print("请输入点餐的桌号(-1退出)：");
+        int orderDiningTableId = Utility.readInt();
+        if (orderDiningTableId == -1){
+            System.out.println("===================取消点餐===============");
+            return;
+        }
+        System.out.print("请输入点餐的菜品号(-1退出)：");
+        int orderMenuId = Utility.readInt();
+            if (orderMenuId == -1){
+                System.out.println("=============取消点餐==============");
+                return;
+            }
+
+        System.out.print("请输入点餐的菜品量(-1退出)：");
+        int orderNums = Utility.readInt();
+        if (orderNums == -1){
+            System.out.println("================取消点餐====================");
+            return;
+        }
+        //验证餐桌号是否存在
+        DiningTable diningTable = diningTableService.getDiningTableById(orderDiningTableId);
+        if (diningTable == null){
+            System.out.println("=================餐桌号不存在====================");
+            return;
+        }
+        //验证菜品编号
+        Menu menuBy = menuService.getMenuById(orderMenuId);
+        if (menuBy == null){
+            System.out.println("===================菜品号不存在=========================");
+            return;
+        }
+        //点餐
+       if (billService.orderMenu(orderMenuId,orderNums,orderDiningTableId)){
+           System.out.println("==================点餐成功=====================");
+       }else {
+           System.out.println("==================点餐失败=====================");
+       }
+    }
+
+    // 显示所有菜品
+    public void listMenu(){
+        System.out.println("\n菜品编号\t\t菜品名\t\t类别\t\t价格");
+        List<Menu> list = menuService.list();
+        for (Menu menu : list){
+            System.out.println(menu);
+        }
+        System.out.println("===================显示完毕===================");
     }
     // 完成订座
     public void orderDiningTable(){
@@ -83,7 +153,7 @@ public class MHLView {
             key = Utility.readString(1);
             switch (key){
                 case "1":
-                    System.out.println("登录满汉楼");
+                    System.out.println("==================登录满汉楼=================");
                     System.out.print("请输入员工号：");
                     String empId = Utility.readString(50);
                     System.out.print("请输入密码：");
@@ -102,7 +172,7 @@ public class MHLView {
                             System.out.println("\t\t 5 查看账单");
                             System.out.println("\t\t 6 结账");
                             System.out.println("\t\t 9 退出满汉楼 ");
-                            System.out.println("请输入你所需要的服务:");
+                            System.out.print("请输入你所需要的服务:");
                             key = Utility.readString(1);
                             switch (key) {
                                 case "1":
@@ -113,13 +183,16 @@ public class MHLView {
                                     //System.out.println("预定餐桌");
                                     break;
                                 case "3":
-                                    System.out.println("显示所有菜品");
+                                    //System.out.println("显示所有菜品");
+                                    listMenu();
                                     break;
                                 case"4":
-                                    System.out.println("点餐服务");
+//                                    System.out.println("点餐服务");
+                                    orderMenu();
                                     break;
                                 case"5":
-                                    System.out.println("查看账单");
+//                                    System.out.println("查看账单");
+                                    listBill();
                                     break;
                                 case"6":
                                     System.out.println("结账");

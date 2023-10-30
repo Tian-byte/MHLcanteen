@@ -27,4 +27,9 @@ public class DiningTableService {  //业务层
                 diningTableDAO.update("update diningTable set state = '已经预定',orderName = ?,orderTable = ?  where id = ?", orderName, orderTel,id);
         return update>0;
     }
+    // 需要提供一个更新餐桌状态的方法
+    public boolean updateDiningTableState(int id,String state){
+        int update = diningTableDAO.update("update diningTable set state = ? where id = ?", state, id);
+        return update > 0;
+    }
 }
