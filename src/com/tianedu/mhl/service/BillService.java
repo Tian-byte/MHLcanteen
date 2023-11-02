@@ -48,15 +48,19 @@ public class BillService {
         return bill != null;
 
     }
-    // 完成结账 如果餐桌存在 并且该餐桌有为结账的账单
-    public boolean payBill(){
+    // 完成结账 如果餐桌存在 并且该餐桌有为结账的账单   如果成功返回一个布尔值
+    public boolean payBill(int diningTableId, String payMode){
         //1.修该bill表
-        billDAO.update("update bill ")
-
-
+        int update = billDAO.update("update bill set state = ? where diningTableId = ? and state = '未结账' ", payMode, diningTableId);
+        if (update <= 0){  //如果更新没有成功，则表示失败....
+            return false;
+        }
         //2.修改diningTable 表
-
-
+        //注意不要在这里操作 而应该调用DiningTableService 方法，完成更新
+        if (!diningTableService.updateDiningTableToFree(diningTableId,"空")){
+            return false;
+        }
+        return true;
     }
 
 }

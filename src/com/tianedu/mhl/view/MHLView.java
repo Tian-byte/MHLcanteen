@@ -9,6 +9,7 @@ import com.tianedu.mhl.service.DiningTableService;
 import com.tianedu.mhl.service.EmployeeService;
 import com.tianedu.mhl.service.MenuService;
 import com.tianedu.mhl.utils.Utility;
+import jdk.jshell.execution.Util;
 
 import java.util.List;
 import java.util.Scanner;
@@ -34,6 +35,48 @@ public class MHLView {
     public static void main(String[] args) {
         new MHLView().mainMenu();
     }
+    //完成结账
+    public void payBill(){
+        System.out.println("================结账服务===================");
+        System.out.println("请选择要结账的餐桌编号（-1退出）");
+
+        int diningTableId = Utility.readInt();
+        if (diningTableId == -1){
+            System.out.println("===============取消结账==============");
+            return;
+        }
+        //验证餐桌是否存在
+        DiningTable diningTableById = diningTableService.getDiningTableById(diningTableId);
+        if (diningTableById == null){
+            System.out.println("===============结账的餐桌不存在==================");
+            return;
+        }
+        //验证餐桌是否有需要结账的账单
+         if  (! billService.hasPayBillByDiningTableId(diningTableId)){
+             System.out.println("==============该餐桌没有未结账的账单===================");
+             return;
+         }
+
+        System.out.println("请选择结账方式(现金/支付宝/微信)回车表示退出：");
+        String payMode = Utility.readString(20, ""); //说明如果回车，则返回的是空""
+        if ("".equals(payMode)){
+            System.out.println("==================取消结账================");
+            return;
+        }
+        char key = Utility.readConfirmSelection();
+        if (key == 'Y'){  //结账
+                //调用payBill
+           if (billService.payBill(diningTableId,payMode)){
+               System.out.println("================完成结账==================");
+           }else {
+               System.out.println("==================结账失败=====================");
+           }
+        }else {
+            System.out.println("==============取消结账===========");
+        }
+
+    }
+
     //显示账单信息
     public void listBill(){
         List<Bill> Bills = billService.list();
@@ -195,7 +238,8 @@ public class MHLView {
                                     listBill();
                                     break;
                                 case"6":
-                                    System.out.println("结账");
+                                    payBill();
+//                                    System.out.println("结账");
                                     break;
                                 case"9":
                                    loop = false;
